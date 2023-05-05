@@ -1,8 +1,29 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
+from django.forms import BaseInlineFormSet
 
-from .models import Article
+from .models import Article, Tag, Scope
+
+
+class RelationshipInlineFormset(BaseInlineFormSet):
+    def clean(self):
+        if [form.cleaned_data['main'] for form in self.forms if form.cleaned_data].count(True) == 1:
+            return super().clean()
+        else:
+            raise ValidationError('(!) Должен быть один главный раздел')
+
+
+class ArticleInline(admin.TabularInline):
+    model = Scope
+    formset = RelationshipInlineFormset
+    extra = 0
 
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    pass
+    inlines = [ArticleInline, ]
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    ordering = ['name']
