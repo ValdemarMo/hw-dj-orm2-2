@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import F
 
 
-class Tag(models.Model):
+class Topic(models.Model):
     name = models.CharField(max_length=256, unique=True, verbose_name='Название')
 
     class Meta:
@@ -19,7 +19,7 @@ class Article(models.Model):
     text = models.TextField(verbose_name='Текст')
     published_at = models.DateTimeField(verbose_name='Дата публикации')
     image = models.ImageField(null=True, blank=True, verbose_name='Изображение',)
-    fields = models.ManyToManyField(Tag, through='Scope')
+    fields = models.ManyToManyField(Topic, through='Scope')
 
     class Meta:
         verbose_name = 'Статья'
@@ -30,10 +30,10 @@ class Article(models.Model):
 
 class Scope(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='scopes')
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='scopes', verbose_name='Разделы')
-    main = models.BooleanField()
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='scopes', verbose_name='Разделы')
+    is_main = models.BooleanField()
 
     class Meta:
-        ordering = ['-main', F('tag').name]
+        ordering = ['-is_main', F('topic').name]
         verbose_name = 'Раздел'
         verbose_name_plural = 'Разделы'
